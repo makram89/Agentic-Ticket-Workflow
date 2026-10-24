@@ -4,3 +4,6 @@ sdlc/changes/*/holdout/
 __pycache__/
 .pytest_cache/
 *.egg-info/
+
+# private assignment answers
+ANSWERS.md

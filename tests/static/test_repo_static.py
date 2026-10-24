@@ -171,17 +171,13 @@ def test_s60_pyproject_has_no_database_or_vector_store():
 
 
 README_HEADINGS = [
+    "What it does",
+    "Flow",
+    "Tech stack",
     "Run",
-    "Tests",
-    "API examples",
-    "Architecture",
-    "Workflow vs activities",
-    "Retries",
-    "Prompt injection",
+    "API",
     "Tracing",
-    "Azure",
-    "AI assistants",
-    "Assumptions & limitations",
+    "Tests",
 ]
 
 
