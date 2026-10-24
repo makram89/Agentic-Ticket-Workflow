@@ -3,7 +3,12 @@
     python demo/run_demo.py                # ids get a fresh suffix, so reruns are not 'duplicates'
     python demo/run_demo.py --suffix ""    # use the raw ids (a second run shows idempotency)
 """
-import argparse, json, pathlib, time, urllib.error, urllib.request
+import argparse
+import json
+import pathlib
+import time
+import urllib.error
+import urllib.request
 
 def call(base, method, path, body=None):
     req = urllib.request.Request(base + path, method=method, headers={"content-type": "application/json"},
@@ -31,7 +36,8 @@ args = ap.parse_args()
 cases = json.loads((pathlib.Path(__file__).parent / "tickets.json").read_text())
 ids = {}
 for c in cases:
-    t = dict(c["ticket"]); t["ticket_id"] += args.suffix
+    t = dict(c["ticket"])
+    t["ticket_id"] += args.suffix
     ids[c["ticket"]["ticket_id"]] = t["ticket_id"]
     status, _ = call(args.base, "POST", "/tickets", t)
     assert status in (200, 202), (t["ticket_id"], status)

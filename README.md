@@ -81,7 +81,7 @@ pytest -q
 - No API key, no network. Exception: first run downloads Temporal's test-server binary; for offline set `TEMPORAL_TEST_SERVER_PATH`.
 - Workflow tests use `WorkflowEnvironment.start_time_skipping()` + fake activities (24h timeout runs instantly).
 - Also: rule unit tests, activity tests (scripted LLMs), API tests (in-memory + end-to-end on Temporal test server), tracing tests, static repo checks.
-- CI: `.github/workflows/tests.yml` runs `pytest -q` on every push.
+- CI: `.github/workflows/tests.yml` runs `ruff check .` and `pytest -q` on every push.
 
 ## Architecture
 
@@ -340,6 +340,12 @@ Limitations:
 - **Personal data in Temporal history.** Ticket text and invoice data are stored there; production needs a
   retention setting and a payload-encryption codec.
 - **Duplicate detection relies on workflow ids**, so after the namespace retention period an id can be reused.
+- **No workflow versioning yet.** A refund can wait 24h for approval, so a changed `TicketWorkflow` deployed while
+  such runs are open could break their replay. Changes to the workflow code need `workflow.patched()` or Temporal
+  worker versioning.
+- **Status reads need a running worker.** `GET /tickets/{id}` uses a workflow query, which a worker must answer,
+  even for a closed workflow. With no worker, the endpoint fails. A closed workflow's result could be read from
+  history instead (`handle.result()`).
 - **Compose is a dev setup:** single-binary Temporal dev server, `latest` image tags, containers run as root, no
   health endpoint for probes.
 
