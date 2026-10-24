@@ -63,9 +63,10 @@
 - R14: `.github/workflows/infra.yml` runs in `infra/`: `terraform fmt -check -recursive`;
   `terraform init -backend=false` + `terraform validate`; `tflint --init` + `tflint` with pinned tflint and azurerm
   ruleset versions. Triggers: `push` and `pull_request`, each with `paths: [infra/**, .github/workflows/infra.yml]`.
-- R15: Root `README.md` Azure section links `infra/README.md` and states what is deployed (Temporal start-dev on
-  Container Apps, ephemeral; PostgreSQL-backed Temporal or Temporal Cloud as the production step); "next steps" no
-  longer lists IaC as missing.
+- R15: Root `README.md` Azure section keeps its existing target-architecture table and bullets unchanged (it is the
+  production design the brief asks for). Below them, add a short "Described vs. deployed in `infra/`" table (one row
+  per README row: Temporal, worker scaling, secrets, auth, LLM, observability — target vs. what `infra/` deploys)
+  and a link to `infra/README.md` ("Production gaps"); "next steps" no longer lists IaC as missing.
 - R16: `.gitignore` (append only) excludes `.terraform/`, `*.tfstate*`, `*.tfvars` (except `*.tfvars.example`),
   `backend.hcl`, `crash.log`; `infra/.terraform.lock.hcl` is committed.
 

@@ -1,0 +1,44 @@
+# Scenario map (sdlc/changes/azure-iac):
+# S1 fmt check, S2 init+validate, S3 tflint: steps below. S4: `on:` + `permissions:` block.
+# S5 no secrets/config complete: manual, reviewed at gate. S6 app code untouched: manual, reviewed at gate.
+# S7 post-deploy smoke: manual, see infra/README.md.
+name: infra
+
+# S4: path-filtered triggers only
+on:
+  push:
+    paths: ["infra/**", ".github/workflows/infra.yml"]
+  pull_request:
+    paths: ["infra/**", ".github/workflows/infra.yml"]
+
+# S4: read-only token, no Azure login, no secrets.*
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+          terraform_wrapper: false
+      - name: S1 terraform fmt
+        run: terraform fmt -check -recursive
+      - name: S2 terraform init + validate
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.53.0
+      - name: S3 tflint
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          tflint --init
+          tflint

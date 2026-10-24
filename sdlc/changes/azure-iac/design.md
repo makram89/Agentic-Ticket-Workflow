@@ -49,7 +49,7 @@ infra/
   README.md                 deploy guide
 .github/workflows/infra.yml
 .gitignore                  append terraform entries (file already has local edits; append only)
-README.md                   Azure section + next steps line only
+README.md                   Azure section: keep target table, append described-vs-deployed table + link; next steps line
 ```
 
 ## Public interfaces

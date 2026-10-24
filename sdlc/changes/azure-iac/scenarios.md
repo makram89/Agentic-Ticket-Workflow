@@ -34,7 +34,7 @@ Verification: **CI** = step in `.github/workflows/infra.yml` (not in `pytest -q`
   `*.tfvars`; the variables are exactly those in R10 with the two validations; images are pinned (no `latest`); the
   registry admin user is off; temporal ingress is internal; temporal-ui is external only with the allow-list; the
   worker, temporal and temporal-ui apps are fixed at 1 replica; the guide has every R13 section (including "Production gaps") and stays short; the
-  root README links the guide and states the ephemeral-state trade-off
+  root README keeps its target-architecture table unchanged, adds the described-vs-deployed table and links the guide
 
 ## S6 (covers N4) [M]: Application code untouched
 - GIVEN the change diff against `main`
