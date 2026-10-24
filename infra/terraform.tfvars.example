@@ -1,0 +1,8 @@
+# Copy to terraform.tfvars (git-ignored). Never put the OpenRouter key in a file:
+# export TF_VAR_openrouter_api_key=... when llm_mode = "openrouter".
+location                  = "northeurope"
+name_prefix               = "ticketflow"
+image_tag                 = "<git-sha-or-version>"
+llm_mode                  = "fake"
+openrouter_model          = "openai/gpt-4o-mini"
+temporal_ui_allowed_cidrs = [] # e.g. ["203.0.113.10/32"]; empty = internal only

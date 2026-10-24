@@ -8,3 +8,11 @@ __pycache__/
 # private assignment answers
 ANSWERS.md
 sdlc/archive/*/holdout/
+
+# terraform
+.terraform/
+*.tfstate*
+*.tfvars
+!*.tfvars.example
+backend.hcl
+crash.log

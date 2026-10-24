@@ -267,6 +267,19 @@ Logs are JSON lines on stdout; ticket lines carry `ticket_id`, `workflow_id`, an
   `InvalidModelOutput` / `AgentLoopExceeded` rates, and rule violations (a spike can mean an injection campaign or
   a model regression).
 
+### Described vs. deployed in `infra/`
+
+| Part | Target (above) | What `infra/` deploys |
+|---|---|---|
+| Temporal | Temporal Cloud or PostgreSQL-backed on AKS, UI behind Entra ID | `start-dev` server in one Container App, state in memory, internal TCP only; UI app internal or IP allow-listed |
+| Worker scaling | KEDA on task-queue backlog | fixed at 1 replica (fake Helpdesk keeps idempotency keys in memory) |
+| Secrets | Key Vault references, managed identities | managed identity for ACR pulls; OpenRouter key as a Container Apps secret (also in Terraform state) |
+| Auth | Entra ID in front of the API | none, public HTTPS API |
+| LLM | Azure OpenAI or OpenRouter | fake by default, OpenRouter optional |
+| Observability | Application Insights as OTLP and log sink | Log Analytics for stdout logs, tracing off |
+
+Deploy guide and the full list of gaps: [infra/README.md](infra/README.md) ("Production gaps").
+
 ## How AI coding assistants were used
 
 The whole repo was built with Claude Code in a spec-driven, test-first flow (SDD × TDD), with three agents and two
@@ -332,5 +345,4 @@ Limitations:
 
 Next steps: Entra ID auth with the reviewer from the token, a Temporal Update with a validator for approvals, a
 `/health` endpoint, non-root containers and pinned images, TLS/API key for Temporal Cloud, a DB-backed `DataRepo`,
-a refund ledger, an evaluation set comparing the real LLM with the fake, and IaC (Bicep or Terraform) for the
-Azure setup above.
+a refund ledger, and an evaluation set comparing the real LLM with the fake.
