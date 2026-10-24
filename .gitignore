@@ -7,3 +7,4 @@ __pycache__/
 
 # private assignment answers
 ANSWERS.md
+sdlc/archive/*/holdout/
