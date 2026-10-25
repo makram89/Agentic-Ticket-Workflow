@@ -346,7 +346,7 @@ Limitations:
 - **Status reads need a running worker.** `GET /tickets/{id}` uses a workflow query, which a worker must answer,
   even for a closed workflow. With no worker, the endpoint fails. A closed workflow's result could be read from
   history instead (`handle.result()`).
-- **Compose is a dev setup:** single-binary Temporal dev server, `latest` image tags, containers run as root, no
+- **Compose is a dev setup:** single-binary Temporal dev server, pinned image tags (`temporalio/temporal:1.4.1`, `jaegertracing/jaeger:2.10.0`), containers run as root, no
   health endpoint for probes.
 
 Next steps: Entra ID auth with the reviewer from the token, a Temporal Update with a validator for approvals, a
