@@ -18,7 +18,7 @@ LLM: `LLM_MODE=fake` (default, rule-based, no key/network) or `openrouter`.
 ```bash
 cp .env.example .env          # fake mode, no key needed
 docker compose up --build
-python demo/run_demo.py       # optional: submits demo/tickets.json and checks each outcome
+python demo/smoke_test.py     # optional: submits demo/tickets.json to the running stack, exits 1 on a mismatch
 ```
 
 | Service | URL |
