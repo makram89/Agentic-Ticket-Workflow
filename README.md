@@ -43,7 +43,7 @@ Without Docker: `pip install -e .[dev]`, `temporal server start-dev`, then `pyth
 ## API
 
 ```bash
-# Start ticket: 202 {"ticket_id":"T-2","workflow_id":"ticket-T-2","created":true}
+# Start ticket (subject max 200 chars, body max 10000; longer -> 422): 202 {"ticket_id":"T-2","workflow_id":"ticket-T-2","created":true}
 # Same id again: 200 {"created":false}, not reprocessed
 curl -s -X POST localhost:8000/tickets -H 'content-type: application/json' -d '{
   "ticket_id": "T-2", "customer_id": "C-100", "subject": "Charged twice",

@@ -15,8 +15,8 @@ ALLOWED_ACTIONS = ("reply", "refund", "escalate", "close")
 class Ticket(BaseModel):
     ticket_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,64}$")
     customer_id: str = Field(min_length=1)
-    subject: str = Field(min_length=1)
-    body: str = Field(min_length=1)
+    subject: str = Field(min_length=1, max_length=200)
+    body: str = Field(min_length=1, max_length=10000)
 
 
 class Customer(BaseModel):
