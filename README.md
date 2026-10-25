@@ -18,7 +18,7 @@ LLM: `LLM_MODE=fake` (default, rule-based, no key/network) or `openrouter`.
 ```bash
 cp .env.example .env          # fake mode, no key needed
 docker compose up --build
-python demo/run_demo.py       # optional: submits demo/tickets.json and checks each outcome
+python demo/smoke_test.py     # optional: submits demo/tickets.json to the running stack, exits 1 on a mismatch
 ```
 
 | Service | URL |
@@ -43,7 +43,7 @@ Without Docker: `pip install -e .[dev]`, `temporal server start-dev`, then `pyth
 ## API
 
 ```bash
-# Start ticket: 202 {"ticket_id":"T-2","workflow_id":"ticket-T-2","created":true}
+# Start ticket (subject max 200 chars, body max 10000; longer -> 422): 202 {"ticket_id":"T-2","workflow_id":"ticket-T-2","created":true}
 # Same id again: 200 {"created":false}, not reprocessed
 curl -s -X POST localhost:8000/tickets -H 'content-type: application/json' -d '{
   "ticket_id": "T-2", "customer_id": "C-100", "subject": "Charged twice",
@@ -285,6 +285,10 @@ Deploy guide and the full list of gaps: [infra/README.md](infra/README.md) ("Pro
 The whole repo was built with Claude Code in a spec-driven, test-first flow (SDD × TDD), with three agents and two
 human gates. All artifacts are in `sdlc/archive/2026-10-23-ticket-workflow/`.
 
+The `sdlc/` directory holds the artifacts of this spec-driven process (intent, spec, scenarios, design, per-change
+archive, `config.env`); it exists because the repo was built with a human-gated SDLC with agents. `sdlc/archive/`
+contains the finished changes: `2026-10-23-ticket-workflow` and `2026-10-24-azure-iac`.
+
 1. **Design:** an agent wrote intent, spec (requirements R1–R26, negative requirements N1–N15), 67 scenarios and a
    technical design. **Gate 1:** I reviewed and approved them.
 2. **Tests:** an agent turned every scenario into tests (140), each traced to a scenario ID and run red before
@@ -329,8 +333,8 @@ Limitations:
 
 - **No authentication or authorization.** Anyone who can reach the API can approve a refund (`reviewer` is a
   self-declared string) and read any ticket's status; ticket IDs are guessable.
-- **Approval is query-then-signal, not atomic.** The workflow ignores late or extra approvals, but if it closes
-  between the check and the signal, the API may return 500 instead of 409.
+- **Approval is query-then-signal, not atomic.** The workflow ignores late or extra approvals, and if it closes
+  between the check and the signal, the API still returns 409.
 - **Fake Helpdesk idempotency is in memory.** A worker restart or a second worker replica could repeat an action.
   A real Helpdesk must enforce the keys on its side.
 - **No refund ledger across tickets.** Two tickets could each refund the same invoice (each needs approval).
@@ -346,7 +350,7 @@ Limitations:
 - **Status reads need a running worker.** `GET /tickets/{id}` uses a workflow query, which a worker must answer,
   even for a closed workflow. With no worker, the endpoint fails. A closed workflow's result could be read from
   history instead (`handle.result()`).
-- **Compose is a dev setup:** single-binary Temporal dev server, `latest` image tags, containers run as root, no
+- **Compose is a dev setup:** single-binary Temporal dev server, pinned image tags (`temporalio/temporal:1.4.1`, `jaegertracing/jaeger:2.10.0`), containers run as root, no
   health endpoint for probes.
 
 Next steps: Entra ID auth with the reviewer from the token, a Temporal Update with a validator for approvals, a

@@ -16,3 +16,16 @@ jobs:
       - run: pip install -e .[dev]
       - run: ruff check .
       - run: pytest -q
+
+  compose-smoke:
+    runs-on: ubuntu-latest
+    env:
+      LLM_MODE: fake
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose up -d --build
+      - run: python3 demo/smoke_test.py
+      - if: failure()
+        run: docker compose logs --no-color
+      - if: always()
+        run: docker compose down -v

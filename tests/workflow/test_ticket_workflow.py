@@ -1,4 +1,5 @@
 """TicketWorkflow in a time-skipping workflow env with fake activities: S-12 .. S-26, S-62."""
+from decimal import Decimal
 from datetime import timedelta
 
 import pytest
@@ -66,7 +67,7 @@ async def test_s13_approved_refund(workflow_env):
     assert fake.act_types == ["refund"]
     act = fake.act_inputs[0]
     assert act.decision.action.invoice_id == "INV-A2"
-    assert act.decision.action.amount_eur == 50.0
+    assert act.decision.action.amount_eur == Decimal("50")
     assert act.idempotency_key == "ticket-TK-2:refund"
     assert res.outcome == "refunded"
     assert status.approval is not None and status.approval.approved is True
@@ -354,7 +355,7 @@ async def test_s24_helpdesk_permanently_down_fails_workflow(workflow_env):
 
 async def test_s25_rule_violation_escalates_without_waiting(workflow_env):
     """S-25"""
-    proposed = fx.refund_decision("INV-A2", 5000.0, category="billing", priority="high")
+    proposed = fx.refund_decision("INV-A2", Decimal("5000"), category="billing", priority="high")
     fake = FakeActivities(decide=decide_returning(proposed))
     async with worker(workflow_env.client, fake.build()) as tq:
         handle = await start(workflow_env.client, fx.tk2(), tq)

@@ -53,8 +53,11 @@ def test_s01_new_ticket_accepted(client, service):
         {**TK1_BODY, "body": ""},
         {**TK1_BODY, "subject": ""},
         {**TK1_BODY, "ticket_id": "x" * 65},
+        {**TK1_BODY, "subject": "x" * 201},
+        {**TK1_BODY, "body": "x" * 10001},
     ],
-    ids=["missing-customer", "bad-ticket-id", "empty-body", "empty-subject", "too-long-id"],
+    ids=["missing-customer", "bad-ticket-id", "empty-body", "empty-subject", "too-long-id",
+         "too-long-subject", "too-long-body"],
 )
 def test_s02_invalid_ticket_rejected(client, service, body):
     """S-02"""

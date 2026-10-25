@@ -1,13 +1,13 @@
 services:
   temporal:
-    image: temporalio/temporal:latest
+    image: temporalio/temporal:1.4.1
     command: ["server", "start-dev", "--ip", "0.0.0.0", "--ui-ip", "0.0.0.0"]
     ports:
       - "7233:7233"   # gRPC
       - "8233:8233"   # web UI
 
   jaeger:
-    image: jaegertracing/jaeger:latest
+    image: jaegertracing/jaeger:2.10.0
     ports:
       - "16686:16686"  # UI
       - "4318:4318"    # OTLP/HTTP

@@ -3,6 +3,8 @@
 Production modules are imported lazily inside the helpers so that a missing
 implementation makes each test fail on its own instead of breaking collection.
 """
+from decimal import Decimal
+
 
 KB_IDS = ("KB-PW", "KB-BILL", "KB-STATUS", "KB-SUSP")
 
@@ -32,10 +34,10 @@ def invoices():
     from ticketflow.models import Invoice
 
     return [
-        Invoice(invoice_id="INV-A1", customer_id="CUST-A", month="2026-01", amount_eur=50.0, status="paid"),
-        Invoice(invoice_id="INV-A2", customer_id="CUST-A", month="2026-01", amount_eur=50.0, status="paid"),
-        Invoice(invoice_id="INV-B1", customer_id="CUST-B", month="2026-01", amount_eur=900.0, status="paid"),
-        Invoice(invoice_id="INV-S1", customer_id="CUST-S", month="2025-12", amount_eur=50.0, status="overdue"),
+        Invoice(invoice_id="INV-A1", customer_id="CUST-A", month="2026-01", amount_eur=Decimal("50.0"), status="paid"),
+        Invoice(invoice_id="INV-A2", customer_id="CUST-A", month="2026-01", amount_eur=Decimal("50.0"), status="paid"),
+        Invoice(invoice_id="INV-B1", customer_id="CUST-B", month="2026-01", amount_eur=Decimal("900.0"), status="paid"),
+        Invoice(invoice_id="INV-S1", customer_id="CUST-S", month="2025-12", amount_eur=Decimal("50.0"), status="overdue"),
     ]
 
 
@@ -114,7 +116,7 @@ def reply_decision(category="account", priority="normal", message="Use the reset
     return decision(category, priority, action("reply", message=message, article_ids=list(article_ids)))
 
 
-def refund_decision(invoice_id="INV-A2", amount=50.0, category="billing", priority="normal"):
+def refund_decision(invoice_id="INV-A2", amount=Decimal("50"), category="billing", priority="normal"):
     """The 'refund fixture decision' (refund INV-A2 50.0, billing, normal) for TK-2."""
     return decision(category, priority, action("refund", invoice_id=invoice_id, amount_eur=amount))
 
