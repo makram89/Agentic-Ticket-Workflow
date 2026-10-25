@@ -285,6 +285,10 @@ Deploy guide and the full list of gaps: [infra/README.md](infra/README.md) ("Pro
 The whole repo was built with Claude Code in a spec-driven, test-first flow (SDD × TDD), with three agents and two
 human gates. All artifacts are in `sdlc/archive/2026-10-23-ticket-workflow/`.
 
+The `sdlc/` directory holds the artifacts of this spec-driven process (intent, spec, scenarios, design, per-change
+archive, `config.env`); it exists because the repo was built with a human-gated SDLC with agents. `sdlc/archive/`
+contains the finished changes: `2026-10-23-ticket-workflow` and `2026-10-24-azure-iac`.
+
 1. **Design:** an agent wrote intent, spec (requirements R1–R26, negative requirements N1–N15), 67 scenarios and a
    technical design. **Gate 1:** I reviewed and approved them.
 2. **Tests:** an agent turned every scenario into tests (140), each traced to a scenario ID and run red before
