@@ -18,7 +18,7 @@ LLM: `LLM_MODE=fake` (default, rule-based, no key/network) or `openrouter`.
 ```bash
 cp .env.example .env          # fake mode, no key needed
 docker compose up --build
-python demo/smoke_test.py     # optional: submits demo/tickets.json to the running stack, exits 1 on a mismatch
+python smoke/smoke_test.py     # optional: submits smoke/tickets.json to the running stack, exits 1 on a mismatch
 ```
 
 | Service | URL |
@@ -225,7 +225,7 @@ Why they differ:
 - **T-4:** the cause is an overdue invoice, so `billing` is a fair reading. The fake model's keyword rules map
   "suspended" to `account` / `high`.
 
-Demo set (`demo/tickets.json`, 14 tickets) against the fake-mode expectations: `openai/gpt-6-luna` 6/14,
+Smoke-test set (`smoke/tickets.json`, 14 tickets) against the fake-mode expectations: `openai/gpt-6-luna` 6/14,
 `anthropic/claude-haiku-5.5` 7/14, `anthropic/claude-sonnet-5.5` 8/14. The differences are in refunds:
 
 - **Refunds are escalated rather than proposed.** `gpt-6-luna` escalated every refund ticket ("refunds require
@@ -237,7 +237,7 @@ Demo set (`demo/tickets.json`, 14 tickets) against the fake-mode expectations: `
 
 In every run, no refund went out without approval, no rule was bypassed and no injected instruction was
 followed. The fake model is more refund-happy than the real ones, which makes it a good driver for the approval
-path in tests and demos. A real model would need a prompt tweak ("propose a valid refund; a person approves
+path in tests and the smoke test. A real model would need a prompt tweak ("propose a valid refund; a person approves
 it") to reach approval more often.
 
 ## Tracing and logs
@@ -306,7 +306,7 @@ The human's role was at the start and in the first two stages, not in the code:
   approved behaviour could not be weakened later.
 - **Code:** no human step. The coder worked alone until the locked tests passed.
 - **After:** I checked the gate reports, had the result code-reviewed for security and cloud readiness (its
-  findings are listed under limitations below), and checked by hand that the application works: the demo tickets
+  findings are listed under limitations below), and checked by hand that the application works: the smoke-test tickets
   through Docker Compose, in fake mode and with a real model.
 
 Where the output was wrong or needed changes:

@@ -1,7 +1,7 @@
-"""Smoke test for a running stack (docker compose up): submit demo/tickets.json to the API and check each outcome.
+"""Smoke test for a running stack (docker compose up): submit smoke/tickets.json to the API and check each outcome.
 
-    python demo/smoke_test.py                # ids get a fresh suffix, so reruns are not 'duplicates'
-    python demo/smoke_test.py --suffix ""    # raw ids (a second run shows idempotency)
+    python smoke/smoke_test.py                # ids get a fresh suffix, so reruns are not 'duplicates'
+    python smoke/smoke_test.py --suffix ""    # raw ids (a second run shows idempotency)
 
 Exit code 0 = every ticket ended as expected, 1 = a mismatch, 2 = the API never became ready.
 """

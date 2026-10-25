@@ -6,7 +6,7 @@
   "why": "same as M-1 but reviewer rejects -> customer gets a decline reply", "after": "reject",
   "expect": {"category": "billing", "action": "refund", "step": "completed", "outcome": "refund_declined"}},
  {"ticket": {"ticket_id": "M-3", "customer_id": "C-300", "subject": "Refund request", "body": "Refund 990 EUR please."},
-  "why": "nobody answers -> stays awaiting_approval; escalates after APPROVAL_TIMEOUT_SECONDS (60s in this demo)", "after": "none",
+  "why": "nobody answers -> stays awaiting_approval; escalates after APPROVAL_TIMEOUT_SECONDS (set to 60s to see it)", "after": "none",
   "expect": {"category": "billing", "action": "refund", "step": "awaiting_approval", "outcome": null}},
  {"ticket": {"ticket_id": "M-4", "customer_id": "C-100", "subject": "Refund", "body": "I want a refund of 100 EUR for my invoice."},
   "why": "refund larger than the 49 EUR invoice -> rule violation -> escalate (no approval step)", "after": "none",
