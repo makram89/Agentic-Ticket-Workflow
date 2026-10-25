@@ -1,5 +1,6 @@
 """Helpdesk interface and the in-process fake Helpdesk (R11, D4)."""
 import random
+from decimal import Decimal
 from typing import Protocol
 
 
@@ -10,7 +11,7 @@ class HelpdeskTemporaryError(Exception):
 class Helpdesk(Protocol):
     def was_seen(self, idempotency_key: str) -> bool: ...
     async def send_reply(self, ticket_id: str, message: str, article_ids: list[str], *, idempotency_key: str) -> str: ...
-    async def issue_refund(self, ticket_id: str, invoice_id: str, amount_eur: float, *, idempotency_key: str) -> str: ...
+    async def issue_refund(self, ticket_id: str, invoice_id: str, amount_eur: Decimal, *, idempotency_key: str) -> str: ...
     async def escalate(self, ticket_id: str, reason: str, *, idempotency_key: str) -> str: ...
     async def close(self, ticket_id: str, reason: str, *, idempotency_key: str) -> str: ...
 
@@ -29,7 +30,7 @@ class FakeHelpdesk:
         self._refs: dict[str, str] = {}
         self._fail_before = 0
         self._fail_after = 0
-        self.refunds: list[tuple[str, float]] = []
+        self.refunds: list[tuple[str, Decimal]] = []
         self.actions: list[dict] = []
 
     def fail_next(self, n: int = 1, *, after_commit: bool = False) -> None:

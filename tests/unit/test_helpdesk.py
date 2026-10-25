@@ -1,4 +1,5 @@
 """FakeHelpdesk: S-29 (failure rate) and idempotency basics (R11)."""
+from decimal import Decimal
 import random
 
 import pytest
@@ -24,10 +25,10 @@ async def test_s29_repeated_key_returns_stored_ref_without_side_effect():
     from ticketflow.services.helpdesk import FakeHelpdesk
 
     hd = FakeHelpdesk(failure_rate=0.0)
-    first = await hd.issue_refund("TK-2", "INV-A2", 50.0, idempotency_key="ticket-TK-2:refund")
-    again = await hd.issue_refund("TK-2", "INV-A2", 50.0, idempotency_key="ticket-TK-2:refund")
+    first = await hd.issue_refund("TK-2", "INV-A2", Decimal("50"), idempotency_key="ticket-TK-2:refund")
+    again = await hd.issue_refund("TK-2", "INV-A2", Decimal("50"), idempotency_key="ticket-TK-2:refund")
     assert first == again
-    assert hd.refunds == [("INV-A2", 50.0)]
+    assert hd.refunds == [("INV-A2", Decimal("50"))]
     assert hd.was_seen("ticket-TK-2:refund")
     assert not hd.was_seen("ticket-TK-9:refund")
 

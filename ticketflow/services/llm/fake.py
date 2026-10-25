@@ -6,6 +6,7 @@ KB articles are only ever taken from `search_kb` results.
 """
 import json
 import re
+from decimal import Decimal
 
 from ticketflow.services.llm.base import LLMReply, make_reply
 
@@ -94,15 +95,15 @@ def _decide(text: str, billing: bool, suspended: bool, invoices: list[dict], hit
         amount = _AMOUNT_RE.search(text)
         if amount and paid:
             latest = max(paid, key=lambda i: (i["month"], i["invoice_id"]))
-            return decision("billing", type="refund", invoice_id=latest["invoice_id"], amount_eur=float(amount.group(1)))
+            return decision("billing", type="refund", invoice_id=latest["invoice_id"], amount_eur=amount.group(1))
         if _has(text, ("twice",)):
             for inv in sorted(paid, key=lambda i: i["invoice_id"], reverse=True):
-                if any(o is not inv and (o["month"], o["amount_eur"]) == (inv["month"], inv["amount_eur"]) for o in paid):
+                if any(o is not inv and (o["month"], Decimal(str(o["amount_eur"]))) == (inv["month"], Decimal(str(inv["amount_eur"]))) for o in paid):
                     return decision("billing", type="refund", invoice_id=inv["invoice_id"], amount_eur=inv["amount_eur"])
         return reply("billing", "Thanks for contacting us about billing. Please see the linked article.")
     if suspended:
         overdue = ", ".join(
-            f"{i['invoice_id']} ({i['amount_eur']:.2f} EUR)" for i in invoices if i.get("status") == "overdue"
+            f"{i['invoice_id']} ({Decimal(str(i['amount_eur'])):.2f} EUR)" for i in invoices if i.get("status") == "overdue"
         )
         return reply("account", f"Your account is suspended because of overdue invoices: {overdue}. "
                                 "Pay them to unlock the account.")

@@ -1,4 +1,5 @@
 """Workflow env with real activity code: S-28, S-41, S-39 (seed smoke), S-58 (c)."""
+from decimal import Decimal
 from datetime import timedelta
 
 import pytest
@@ -58,7 +59,7 @@ async def test_s28_idempotent_refund_under_temporal_retry(workflow_env, repo):
     assert res.outcome == "refunded"
     assert attempts == [1, 2]
     assert res.action.duplicate is True
-    assert helpdesk.refunds == [("INV-A2", 50.0)]
+    assert helpdesk.refunds == [("INV-A2", Decimal("50"))]
 
 
 # ---------------------------------------------------------------- S-41
@@ -75,7 +76,7 @@ async def test_s41_prompt_injection_through_full_fake_pipeline(workflow_env, rep
     proposed = status.proposed_decision
     assert proposed.action.type == "refund"
     assert proposed.action.invoice_id == "INV-A2"
-    assert proposed.action.amount_eur == 5000.0
+    assert proposed.action.amount_eur == Decimal("5000")
     assert status.decision.action.type == "escalate"
     assert status.violations
     assert status.approval is None
@@ -104,12 +105,12 @@ async def test_s41_never_awaits_approval(workflow_env, repo):
 # Expected fake-mode outcomes on the seed data (design.md Appendix A).
 SEED_EXPECTED = {
     "T-1": dict(category="account", priority="normal", action="reply", articles=["KB-1"]),
-    "T-2": dict(category="billing", priority="normal", action="refund", invoice=("INV-1002", 49.0)),
+    "T-2": dict(category="billing", priority="normal", action="refund", invoice=("INV-1002", Decimal("49"))),
     "T-3": dict(category="technical", priority="urgent", action="escalate", reason="urgent"),
     "T-4": dict(category="account", priority="high", action="reply", articles=["KB-4"], message="INV-4001"),
     "T-5": dict(category="other", priority="low", action="close", reason="off-topic"),
     "T-6": dict(category="billing", priority="high", action="escalate", reason="rule violation",
-                proposed_refund=("INV-1002", 5000.0)),
+                proposed_refund=("INV-1002", Decimal("5000"))),
     "T-7": dict(category="other", priority="normal", action="escalate", reason="C-999"),
 }
 

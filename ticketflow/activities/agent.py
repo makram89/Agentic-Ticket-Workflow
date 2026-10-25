@@ -73,7 +73,7 @@ TOOLS: list[dict] = [
                             "message": {"type": "string"},
                             "article_ids": {"type": "array", "items": {"type": "string"}},
                             "invoice_id": {"type": "string"},
-                            "amount_eur": {"type": "number"},
+                            "amount_eur": {"type": "number", "description": "EUR, at most 2 decimals"},
                             "reason": {"type": "string"},
                         },
                         "required": ["type"],
@@ -114,7 +114,7 @@ def _run_read_tool(call: ToolCall, customer_id: str, repo: DataRepo):
         customer = repo.get_customer(customer_id)
         return customer.model_dump() if customer else {"error": "customer not found"}
     if call.name == "get_invoices":
-        return [i.model_dump() for i in repo.get_invoices(customer_id)]
+        return [i.model_dump(mode="json") for i in repo.get_invoices(customer_id)]
     query = (call.arguments or {}).get("query")
     return [a.model_dump() for a in repo.search_kb(query if isinstance(query, str) else "")]
 
