@@ -333,8 +333,8 @@ Limitations:
 
 - **No authentication or authorization.** Anyone who can reach the API can approve a refund (`reviewer` is a
   self-declared string) and read any ticket's status; ticket IDs are guessable.
-- **Approval is query-then-signal, not atomic.** The workflow ignores late or extra approvals, but if it closes
-  between the check and the signal, the API may return 500 instead of 409.
+- **Approval is query-then-signal, not atomic.** The workflow ignores late or extra approvals, and if it closes
+  between the check and the signal, the API still returns 409.
 - **Fake Helpdesk idempotency is in memory.** A worker restart or a second worker replica could repeat an action.
   A real Helpdesk must enforce the keys on its side.
 - **No refund ledger across tickets.** Two tickets could each refund the same invoice (each needs approval).

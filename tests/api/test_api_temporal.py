@@ -96,3 +96,27 @@ async def test_s11_end_to_end_through_http(workflow_env):
             assert (await client.post("/tickets/NOPE/approval", json={"approved": True})).status_code == 404
 
     assert fake.act_types == ["refund"]
+
+
+async def test_approval_after_workflow_closed_is_not_awaiting(workflow_env):
+    """Race: the step check says awaiting_approval, but the workflow closes before the signal -> NotAwaiting (409)."""
+    import pytest
+
+    from ticketflow.api.service import NotAwaiting, TemporalTicketService
+    from ticketflow.models import Approval, TicketStatus
+    from ticketflow.workflow.ticket_workflow import AWAITING_APPROVAL
+
+    fake = FakeActivities(
+        decide=decide_returning(fx.reply_decision(article_ids=["KB-PW"]), customer_id="CUST-F")
+    )
+    async with worker(workflow_env.client, fake.build()) as tq:
+        service = TemporalTicketService(workflow_env.client, task_queue=tq)
+        wid, _ = await service.start_ticket(fx.tk1())
+        await result(workflow_env.client.get_workflow_handle(wid))
+
+        async def stale_status(ticket_id):
+            return TicketStatus(ticket_id=ticket_id, workflow_id=wid, step=AWAITING_APPROVAL), "RUNNING"
+
+        service.get_status = stale_status
+        with pytest.raises(NotAwaiting):
+            await service.send_approval("TK-1", Approval(approved=True))

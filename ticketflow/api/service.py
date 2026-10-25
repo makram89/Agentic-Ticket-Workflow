@@ -66,4 +66,11 @@ class TemporalTicketService:
             raise NotFound(ticket_id)
         if found[0].step != AWAITING_APPROVAL:
             raise NotAwaiting(ticket_id)
-        await self._client.get_workflow_handle(workflow_id_for(ticket_id)).signal(TicketWorkflow.approval, approval)
+        handle = self._client.get_workflow_handle(workflow_id_for(ticket_id))
+        try:
+            await handle.signal(TicketWorkflow.approval, approval)
+        except RPCError as exc:
+            # The workflow closed between the check above and the signal.
+            if exc.status == RPCStatusCode.NOT_FOUND:
+                raise NotAwaiting(ticket_id) from exc
+            raise
