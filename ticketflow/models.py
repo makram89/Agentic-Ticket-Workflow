@@ -5,7 +5,10 @@ and usable by the framework-free rules module.
 """
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from decimal import ROUND_HALF_UP, Decimal
+from typing import Annotated
+
+from pydantic import AfterValidator, BaseModel, Field
 
 ALLOWED_CATEGORIES = ("account", "billing", "technical", "other")
 ALLOWED_PRIORITIES = ("low", "normal", "high", "urgent")
@@ -26,11 +29,20 @@ class Customer(BaseModel):
     status: str
 
 
+def _cents(value: Decimal) -> Decimal:
+    return value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+# Exact money: floats from JSON/LLM are read via str() by pydantic, then rounded to cents.
+# Serialised as a JSON string (e.g. "50.00") so Temporal payloads and API responses are lossless.
+Money = Annotated[Decimal, AfterValidator(_cents)]
+
+
 class Invoice(BaseModel):
     invoice_id: str
     customer_id: str
     month: str
-    amount_eur: float
+    amount_eur: Money
     status: str
 
 
@@ -47,7 +59,7 @@ class Action(BaseModel):
     message: str | None = None
     article_ids: list[str] = []
     invoice_id: str | None = None
-    amount_eur: float | None = None
+    amount_eur: Money | None = None
     reason: str | None = None
 
 

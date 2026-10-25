@@ -1,4 +1,5 @@
 """LLM providers: FakeLLM shape (S-40), OpenRouter adapter translation (S-57) and error mapping (S-67)."""
+from decimal import Decimal
 import json
 
 import httpx
@@ -198,7 +199,7 @@ async def test_s40_fake_llm_is_deterministic(repo):
     assert a.category == "billing"
     assert a.action.type == "refund"
     assert a.action.invoice_id == "INV-A2"
-    assert a.action.amount_eur == 50.0
+    assert a.action.amount_eur == Decimal("50")
 
 
 def _err(cls, status):

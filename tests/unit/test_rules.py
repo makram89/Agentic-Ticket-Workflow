@@ -1,4 +1,5 @@
 """Pure rule checks (spec R9): scenarios S-42 .. S-54."""
+from decimal import Decimal
 import pytest
 
 from tests import fixtures as fx
@@ -24,8 +25,8 @@ def assert_escalated(res):
     "make",
     [
         lambda: fx.reply_decision(article_ids=["KB-PW"]),
-        lambda: fx.refund_decision("INV-A2", 50.0),
-        lambda: fx.refund_decision("INV-A2", 0.01),
+        lambda: fx.refund_decision("INV-A2", Decimal("50")),
+        lambda: fx.refund_decision("INV-A2", Decimal("0.01")),
         lambda: fx.escalate_decision(reason="outage needs a human"),
         lambda: fx.close_decision(reason="spam"),
     ],
@@ -67,18 +68,18 @@ def test_s45_bad_action_type_escalates():
 
 def test_s46_refund_of_other_customers_invoice_escalates():
     """S-46"""
-    res = check(fx.refund_decision("INV-B1", 10.0), customer_id="CUST-A", invoices=fx.invoices())
+    res = check(fx.refund_decision("INV-B1", Decimal("10")), customer_id="CUST-A", invoices=fx.invoices())
     assert_escalated(res)
     assert any("INV-B1" in v and "customer" in v.lower() for v in res.violations)
 
 
 def test_s47_refund_over_invoice_amount_and_boundary():
     """S-47"""
-    over = check(fx.refund_decision("INV-A2", 50.01))
+    over = check(fx.refund_decision("INV-A2", Decimal("50.01")))
     assert_escalated(over)
     assert any("50.01" in v for v in over.violations)
 
-    exact = check(fx.refund_decision("INV-A2", 50.0))
+    exact = check(fx.refund_decision("INV-A2", Decimal("50")))
     assert exact.violations == []
     assert exact.decision.action.type == "refund"
 
@@ -93,7 +94,7 @@ def test_s48_non_positive_refund_amount_escalates(amount):
     "make",
     [
         lambda: fx.refund_decision("INV-NOPE", 10.0),
-        lambda: fx.decision("billing", "normal", fx.action("refund", invoice_id=None, amount_eur=10.0)),
+        lambda: fx.decision("billing", "normal", fx.action("refund", invoice_id=None, amount_eur=Decimal("10"))),
         lambda: fx.decision("billing", "normal", fx.action("refund", invoice_id="INV-A2", amount_eur=None)),
     ],
     ids=["unknown-invoice", "no-invoice-id", "no-amount"],
@@ -105,14 +106,14 @@ def test_s49_unknown_or_missing_invoice_escalates(make):
 
 def test_s50_refund_of_non_paid_invoice_escalates():
     """S-50"""
-    res = check(fx.refund_decision("INV-S1", 50.0), customer_id="CUST-S")
+    res = check(fx.refund_decision("INV-S1", Decimal("50")), customer_id="CUST-S")
     assert_escalated(res)
     assert any("status" in v.lower() for v in res.violations)
 
 
 def test_s51_injected_oversized_refund_escalates():
     """S-51"""
-    res = check(fx.refund_decision("INV-A2", 5000.0))
+    res = check(fx.refund_decision("INV-A2", Decimal("5000")))
     assert_escalated(res)
     assert res.decision.action.reason.startswith("rule violation: ")
 
@@ -139,7 +140,7 @@ def test_s53_escalate_and_close_need_a_reason():
 
 def test_s54_all_violations_are_listed():
     """S-54"""
-    proposed = fx.decision("x", "y", fx.action("refund", invoice_id="INV-B1", amount_eur=5000.0))
+    proposed = fx.decision("x", "y", fx.action("refund", invoice_id="INV-B1", amount_eur=Decimal("5000")))
     res = check(proposed, customer_id="CUST-A", invoices=fx.invoices())
     assert len(res.violations) >= 4
     assert_escalated(res)
@@ -147,3 +148,12 @@ def test_s54_all_violations_are_listed():
         assert v in res.decision.action.reason
     assert res.decision.category == "other"
     assert res.decision.priority == "normal"
+
+
+def test_money_is_exact_decimal_and_serialises_as_string():
+    from ticketflow.models import Action
+
+    a = Action.model_validate({"type": "refund", "invoice_id": "INV-A2", "amount_eur": 0.1 + 0.2})
+    assert a.amount_eur == Decimal("0.30")  # float artefact 0.30000000000000004 is rounded to cents
+    assert '"amount_eur":"0.30"' in a.model_dump_json()
+    assert Action.model_validate_json(a.model_dump_json()) == a

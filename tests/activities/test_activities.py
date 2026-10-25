@@ -1,4 +1,5 @@
 """Real TicketActivities in ActivityEnvironment with scripted/spy LLMs: S-27, S-30 .. S-36."""
+from decimal import Decimal
 import dataclasses
 import json
 
@@ -65,7 +66,7 @@ async def test_s27_refund_issued_once_when_response_lost(repo):
     assert second.helpdesk_ref
     third = await env.run(acts.execute_action, inp)
     assert third.helpdesk_ref == second.helpdesk_ref
-    assert helpdesk.refunds == [("INV-A2", 50.0)]
+    assert helpdesk.refunds == [("INV-A2", Decimal("50"))]
 
 
 @pytest.mark.parametrize(
